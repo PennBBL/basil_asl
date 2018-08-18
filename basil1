@@ -57,10 +57,10 @@ call_fabber() {
     $fabber --data=$infile --mask=$mask --output=$outdir/step$step --model=$model $allinstruct $vbinstruct $extras -@ $options $1
     if [ $step -gt 1 ]; then
 	if [ ! -z $devel ]; then #save a copy of the init MVN in the step
-	    imcp $outdir/temp $outdir/step$step/initMVN 
+	    cp $outdir/temp.nii.gz $outdir/step$step/initMVN.nii.gz 
 	fi
     fi
-    imcp $outdir/step$step/finalMVN $outdir/temp
+    cp $outdir/step$step/finalMVN.nii.gz  $outdir/temp.nii.gz
 
 }
 
@@ -161,8 +161,8 @@ until [ -z $1 ]; do
 done
 
 # version of software to use
-fabber=fabber_asl
-mvntool=mvntool
+fabber=fabber_asl1
+mvntool=mvntool1
 
 #if [ ! -z $devel ]; then
     # in development mode use local version of fabber
