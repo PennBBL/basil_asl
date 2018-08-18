@@ -480,7 +480,7 @@ if [ ! -z $fast ]; then
 fi
 
 if [ -z $devel ]; then
-imrm $outdir/temp
+rm -rf $outdir/temp
 fi
 
 echo "End."
