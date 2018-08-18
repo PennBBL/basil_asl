@@ -1,9 +1,11 @@
 #!/bin/sh
 
+#Edited by Azeez to supress spatial regularization and make it compatible for fsl 5.0.11
+#
 # BASIL: Bayesian Arterial SpIn Labeling parameter estimation
 #
 # Michael Chappell, QuBIc & FMRIB Image Analysis Group
-#
+# 
 # Copyright (c) 2007-2012 University of Oxford
 #
 # SHCOPYRIGHT
