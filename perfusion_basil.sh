@@ -4,7 +4,7 @@
 #
 # Azeez , F
 #
-# 
+# still working on it dude!
 
 # Make script use local copies of helper scripts/programs in the same
 # directory, if present. This allows for multiple versions of the scripts
@@ -274,9 +274,9 @@ fi
 
 
 # read in ASL data
-imcp $infile $tempdir/asldata # this is the MAIN data that we will reflect any corrections applied
+cp $infile $tempdir/asldata.nii.gz # this is the MAIN data that we will reflect any corrections applied
 # take a copy that will not be subject to any subsequent corrections
-imcp $tempdir/asldata $tempdir/asldata_orig
+cp $tempdir/asldata $tempdir/asldata_orig.nii.gz
 
 ### Motion Correction (main)
 # note motion correction within calibration data is done above
@@ -293,7 +293,7 @@ fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 ### Label-control subtraction (we repeat subtraction after doing distortion correction - when applicable)
  echo " Do asl data processing"
 
- $BASIL/asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata 
+ asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata 
 
 # Generate a perfusion-weighted image by taking the mean over all TIs of the differenced data
 fslmaths $tempdir/diffdata -Tmean $tempdir/pwi
@@ -432,7 +432,7 @@ datafile=$tempdir/diffdata
 
 #mkdir -p $tempdir/basil 
 echo  "Main run of BASIL on ASL data"
-$BASIL/basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt 
+basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt 
 ### End of: First analysis on whole data
 
 
@@ -469,7 +469,7 @@ fi
 ### Partial Volume Correction BASIL
 if [ ! -z $pvcorr ]; then
    echo  "Main run of BASIL on ASL data with perfusion correction"
-   $BASIL/basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+   basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
 fi
 ### End of: Partial Volume Correction
 
@@ -534,7 +534,7 @@ fi
 # Note we do this here, as we have the registration done and masks created and calibration complete
 
 # save the mask used to the (native space) output directory
-imcp $mask $outdir/native_space/mask
+cp $mask $outdir/native_space/mask.nii.gz
 ### End of: Output main BASIL results
 fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
 fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
@@ -554,16 +554,16 @@ fi
 if [ ! -z $pvcorr ]; then
 mkdir $outdir/pvcorr
 # copy PVE in ASL space to output directory
-imcp $tempdir/pvgm_inasl $outdir/native_space/pvgm_inasl
-imcp $tempdir/pvwm_inasl $outdir/native_space/pvwm_inasl
+cp $tempdir/pvgm_inasl.nii.gz $outdir/native_space/pvgm_inasl.nii.gz
+cp $tempdir/pvwm_inasl.nii.gz $outdir/native_space/pvwm_inasl.nii.gz
 fi
 
 if [ ! -z $pvexist ]; then
     # copy PV masks to output directory
-    imcp $tempdir/gmmask $outdir/native_space/gm_mask
-    imcp $tempdir/wmmask $outdir/native_space/wm_mask
-    imcp $tempdir/gmmask_pure $outdir/native_space/gm_roi
-    imcp $tempdir/wmmask_pure $outdir/native_space/wm_roi
+    cp $tempdir/gmmask.nii.gz $outdir/native_space/gm_mask.nii.gz
+    cp $tempdir/wmmask.nii.gz $outdir/native_space/wm_mask.nii.gz
+    cp $tempdir/gmmask_pure.nii.gz $outdir/native_space/gm_roi.nii.gz
+    cp $tempdir/wmmask_pure.nii.gz $outdir/native_space/wm_roi.nii.gz
     fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/pvcorr/cbf
     fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/pvcorr/noise 
 
