@@ -161,8 +161,8 @@ until [ -z $1 ]; do
 done
 
 # version of software to use
-fabber=$BASIL/fabber_asl1
-mvntool=$BASIL/mvntool1
+fabber=fabber_asl
+mvntool=mvntool
 
 #if [ ! -z $devel ]; then
     # in development mode use local version of fabber
