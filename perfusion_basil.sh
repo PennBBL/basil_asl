@@ -47,7 +47,7 @@ Usage_extended() {
     echo " --fulldata   : Never average multiple measurements at each TI"
     
     echo " Registration "
-    echo " --stuct2al : transformation matrix from struct data to asl"
+    echo " --struct2al : transformation matrix from struct data to asl"
     echo "                "
 
     echo " Calibration"
@@ -293,7 +293,7 @@ fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 ### Label-control subtraction (we repeat subtraction after doing distortion correction - when applicable)
  echo " Do asl data processing"
 
- asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata 
+asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata 
 
 # Generate a perfusion-weighted image by taking the mean over all TIs of the differenced data
 fslmaths $tempdir/diffdata -Tmean $tempdir/pwi
@@ -448,11 +448,11 @@ if [ ! -z $pvgm ]; then
         echo "PV GM is: $pvgm and register it to asldata"
         antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvgm -ref $mask-out $tempdir/pvgm.nii.gz -init $struct2asl -applyxfm
-	fslmaths $tempdir/pvgm -thr 0.001 -min 1 $tempdir/pvgm_inasl
+	fslmaths $tempdir/pvgm -thr 0.1 -min 1 $tempdir/pvgm_inasl
 	echo "PV WM is: $pvwm and register it to asl data"
         antsApplyTransforms -e 3 -d 3  -i $pvwm -o $tempdir/pvwm.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvwm -ref $mask -out $tempdir/pvwm.nii.gz -init $struct2asl  -applyxfm
-	fslmaths $tempdir/pvwm -thr 0.001 -min 1 $tempdir/pvwm_inasl
+	fslmaths $tempdir/pvwm -thr 0.1 -min 1 $tempdir/pvwm_inasl
         pvexist=1	
 fi
 
@@ -584,4 +584,3 @@ rm -r $tempdir
 
 echo "Output is $outdir/"
 echo "persufsion as - done."
-
