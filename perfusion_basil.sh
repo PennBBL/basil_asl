@@ -517,12 +517,22 @@ fi
 ### Partial Volume Correction BASIL
 if [ ! -z $pvcorr ]; then
   echo  "Main run of BASIL on ASL data with perfusion correction"
-   if [! -z spatial]; then 
-    basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl --spatial 
-    else 
-    basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+   if [! -z $spatial]; then 
+      if [ -z $struct_space]; then
+      basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      else
+      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      fi
+   else 
+      if [ -z $struct_space]; then
+      basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      else
+      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      fi
     fi
 fi
+
+
 ### End of: Partial Volume Correction
 
 
