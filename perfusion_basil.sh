@@ -586,8 +586,14 @@ if [ ! -z $calibflag ]; then
 	fi
          fslmaths $Mo -mul $alpha -div 0.9 $Mo
 	#inlcude partiition co-effcient in M0 image to convert from M0 tissue to M0 arterial
-	
+	if [ ! -z $struct_space]; then 
+	antsApplyTransforms -e 3 -d 3  -i $Mo -o $outdir/calib/Mo_structspace.nii.gz -r $struct -t $asl2struct -n Linear
+	Mo1=$outdir/calib/Mo_structspace.nii.gz
+	fi
 fi
+
+
+
 
 ### End of: Calibration
 
@@ -604,7 +610,7 @@ cp $mask $outdir/native_space/mask.nii.gz
 if [ ! -z $spatial]; then 
    if [ ! -z $struct_space ]; then 
    mkdir $outdir/struct_space
-   fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_spacecbf
+   fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/cbf
    fslmaths $tempdir/basil2/step1/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/acbv 
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
    cp $tempdir/basil/step1/logfile  $outdir/struct_space/logfile
@@ -615,7 +621,7 @@ if [ ! -z $spatial]; then
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
    cp $tempdir/basil/step2/logfile  $outdir/struct_space_spatial/logfile
    fslmaths $tempdir/basil2/step2/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/nstruct_space_spatial/noise 
-   else 
+    
    fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
    fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
@@ -628,30 +634,53 @@ if [ ! -z $spatial]; then
    cp $tempdir/basil/step2/logfile  $outdir/native_space_spatial/logfile
    fslmaths $tempdir/basil/step2/noise_means -mul $mask  $outdir/native_space_spatial/noise 
    else 
-   fi
- else 
-   if [ ! -z $struct_space ]; then 
-   mkdir $outdir/struct_space
-   fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_spacecbf
-   fslmaths $tempdir/basil2/step1/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/acbv 
-   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
-   cp $tempdir/basil/step1/logfile  $outdir/struct_space/logfile
-   fslmaths $tempdir/basil2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/noise 
-   else
-    fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
+   fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
    fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
    cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
-   fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise
+   fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise 
+   mkdir $outdir/native_space_spatial 
+   fslmaths $tempdir/basil/step2/mean_ftiss -mul $mask  $outdir/native_space_spatial/cbf
+   fslmaths $tempdir/basil/step2/mean_fblood -mul $mask  $outdir/native_space_spatial/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step2/logfile  $outdir/native_space_spatial/logfile
+   fslmaths $tempdir/basil/step2/noise_means -mul $mask  $outdir/native_space_spatial/noise 
    fi
+
 fi
 
 
 
 if [ ! -z $calibflag ]; then
    fslcpgeom $outdir/native_space/cbf $Mo -d
-   fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
-   fslmaths $outdir/native_space/noise -mul 6000 -div $Mo $outdir/native_space/noise_calib
+   fslcpgeom $outdir/native_space/cbf $Mo1 -d
+   if [ ! -z $spatial]; then 
+       if [! -z $struct_space]; then 
+       fslmaths $outdir/struct_space/cbf -mul 6000 -div $Mo1 $outdir/struct_space/cbf_calib
+       fslmaths $outdir/struct_space/noise -mul 6000 -div $Mo1 $outdir/struct_space/noise_calib
+       fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
+       fslmaths $outdir/native_space/noise -mul 6000 -div $Mo $outdir/native_space/noise_calib
+       
+       fslmaths $outdir/struct_space_spatial/cbf -mul 6000 -div $Mo1 $outdir/struct_space_spatial/cbf_calib
+       fslmaths $outdir/struct_space_spatial/noise -mul 6000 -div $Mo1 $outdir/struct_space_spatial/noise_calib
+       fslmaths $outdir/native_space_spatial/cbf -mul 6000 -div $Mo $outdir/native_space_spatial/cbf_calib
+       fslmaths $outdir/native_space_spatial/noise -mul 6000 -div $Mo $outdir/native_space_spatial/noise_calib
+       else
+       fslmaths $outdir/native_space_spatial/cbf -mul 6000 -div $Mo $outdir/native_space_spatial/cbf_calib
+       fslmaths $outdir/native_space_spatial/noise -mul 6000 -div $Mo $outdir/native_space_spatial/noise_calib
+       fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
+       fslmaths $outdir/native_space/noise -mul 6000 -div $Mo $outdir/native_space/noise_calib
+       fi  
+   else 
+      if [! -z $struct_space]; then 
+      fslmaths $outdir/struct_space/cbf -mul 6000 -div $Mo1 $outdir/struct_space/cbf_calib
+      fslmaths $outdir/struct_space/noise -mul 6000 -div $Mo1 $outdir/struct_space/noise_calib
+      fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
+      fslmaths $outdir/native_space/noise -mul 6000 -div $Mo $outdir/native_space/noise_calib
+      else
+      fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
+      fslmaths $outdir/native_space/noise -mul 6000 -div $Mo $outdir/native_space/noise_calib
+      fi 
 fi
 
 
@@ -660,8 +689,8 @@ fi
 if [ ! -z $pvcorr ]; then
 mkdir $outdir/pvcorr
 # copy PVE in ASL space to output directory
-cp $tempdir/pvgm_inasl.nii.gz $outdir/native_space/pvgm_inasl.nii.gz
-cp $tempdir/pvwm_inasl.nii.gz $outdir/native_space/pvwm_inasl.nii.gz
+cp $tempdir/pvgm_inasl.nii.gz $outdir/pvgm_inasl.nii.gz
+cp $tempdir/pvwm_inasl.nii.gz $outdir/pvwm_inasl.nii.gz
 fi
 
 if [ ! -z $pvexist ]; then
@@ -670,18 +699,78 @@ if [ ! -z $pvexist ]; then
     cp $tempdir/wmmask.nii.gz $outdir/native_space/wm_mask.nii.gz
     cp $tempdir/gmmask_pure.nii.gz $outdir/native_space/gm_roi.nii.gz
     cp $tempdir/wmmask_pure.nii.gz $outdir/native_space/wm_roi.nii.gz
-    fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/pvcorr/cbf
-    fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/pvcorr/noise 
-
-    if [ ! -z $calibflag ]; then
-    fslcpgeom $outdir/pvcorr/cbf $Mo -d
-    fslmaths $outdir/pvcorr/cbf  -mul 6000 -div $Mo $outdir/pvcorr/cbf_calib
-    fslmaths $outdir/pvcorr/cbf  -mul 6000 -div $Mo $outdir/pvcorr/noise_calib
-   fi
-   
-  
+    if [ ! -z $spatial]; then 
+        if [ ! -z  $struct_space]; then
+	mkdir $outdir/struct_space/pvcorr
+        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/struct_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/struct_space/pvcorr/noise 
+        mkdir $outdir/struct_space_spatial/pvcorr
+        fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/struct_space_spatial/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/struct_space_spatial/pvcorr/noise 
+	mkdir $outdir/native_space/pvcorr
+        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/native_space/pvcorr/noise 
+        mkdir $outdir/native_space_spatial/pvcorr
+        fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/native_space_spatial/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/native_space_spatial/pvcorr/noise  
+	else
+	mkdir $outdir/native_space/pvcorr
+        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/native_space/pvcorr/noise 
+        mkdir $outdir/native_space_spatial/pvcorr
+        fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/native_space_spatial/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/native_space_spatial/pvcorr/noise
+	fi
+  else
+     if [ ! -z  $struct_space]; then
+	mkdir $outdir/struct_space/pvcorr
+        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/struct_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/struct_space/pvcorr/noise 
+        
+	mkdir $outdir/native_space/pvcorr
+        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/native_space/pvcorr/noise 
+        else
+	mkdir $outdir/native_space/pvcorr
+        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/native_space/pvcorr/noise	
+	fi 
+  fi 
 fi
 
+
+if [!  -z $calibflag ]; then 
+    if [ ! -z $pvexist ]; then 
+          if [ ! -z $spatial]; then 
+              if [! -z $struct_space]; then 
+                  fslmaths $outdir/struct_space/pvcorr/cbf -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_calib
+                  fslmaths $outdir/struct_space/pvcorr/noise -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/noise_calib
+                  fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
+                  fslmaths $outdir/native_space/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space/pvcorr/noise_calib
+       
+                 fslmaths $outdir/struct_space_spatial/pvcorr/cbf -mul 6000 -div $Mo1 $outdir/struct_space_spatial/pvcorr/cbf_calib
+                 fslmaths $outdir/struct_space_spatial//pvcorr/noise -mul 6000 -div $Mo1 $outdir/struct_space_spatial/pvcorr/noise_calib
+                 fslmaths $outdir/native_space_spatial/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space_spatial/pvcorr/cbf_calib
+                 fslmaths $outdir/native_space_spatial/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space_spatial/pvcorr/noise_calib
+            else
+	         fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
+                 fslmaths $outdir/native_space/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space/pvcorr/noise_calib
+		 fslmaths $outdir/native_space_spatial/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space_spatial/pvcorr/cbf_calib
+                 fslmaths $outdir/native_space_spatial/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space_spatial/pvcorr/noise_calib
+	   fi	 
+     else 
+            if [! -z $struct_space]; then 
+                  fslmaths $outdir/struct_space/pvcorr/cbf -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_calib
+                  fslmaths $outdir/struct_space/pvcorr/noise -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/noise_calib
+                  fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
+                  fslmaths $outdir/native_space/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space/pvcorr/noise_calib
+      
+            else
+	         fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
+                 fslmaths $outdir/native_space/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space/pvcorr/noise_calib
+	    fi
+    fi
+fi
 # clearup
 
 rm -r $tempdir
@@ -690,3 +779,4 @@ rm -r $tempdir
 
 echo "Output is $outdir/"
 echo "persufsion as - done."
+/
