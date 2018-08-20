@@ -14,7 +14,7 @@ Usage() {
     echo "perfusion_basil"
     echo "Calculate perfusion maps from ASL data"
     echo ""
-    echo ""
+    echo "Usage: perfusion_basil -i <asl_data> -o <output_dir_name> [options]"
     echo ""
     echo " Main options:"
     echo " -m         : mask (in native space of ASL data) - {default: automatically generated}"
@@ -79,6 +79,14 @@ exit 0
 }
 
 
+if [ -z $1 ]; then
+    Usage
+    exit 1
+elif [ $1 = "--more" ]; then
+    Usage
+    Usage_extended
+    exit 1
+fi
 
 until [ -z $1 ]; do
 
