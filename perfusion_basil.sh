@@ -601,14 +601,50 @@ cp $mask $outdir/native_space/mask.nii.gz
 
 
 
-
-
-fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
-fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
-cp $tempdir/basil_options.txt  $outdir/basil_option.txt
-cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
-fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise 
-
+if [ ! -z $spatial]; then 
+   if [ ! -z $struct_space ]; then 
+   mkdir $outdir/struct_space
+   fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_spacecbf
+   fslmaths $tempdir/basil2/step1/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step1/logfile  $outdir/struct_space/logfile
+   fslmaths $tempdir/basil2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/noise 
+   mkdir $outdir/struct_space_spatial 
+   fslmaths $tempdir/basil2/step2/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space_spatial/cbf
+   fslmaths $tempdir/basil2/step2/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space_spatial/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step2/logfile  $outdir/struct_space_spatial/logfile
+   fslmaths $tempdir/basil2/step2/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/nstruct_space_spatial/noise 
+   else 
+   fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
+   fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
+   fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise 
+   mkdir $outdir/native_space_spatial 
+   fslmaths $tempdir/basil/step2/mean_ftiss -mul $mask  $outdir/native_space_spatial/cbf
+   fslmaths $tempdir/basil/step2/mean_fblood -mul $mask  $outdir/native_space_spatial/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step2/logfile  $outdir/native_space_spatial/logfile
+   fslmaths $tempdir/basil/step2/noise_means -mul $mask  $outdir/native_space_spatial/noise 
+   else 
+   fi
+ else 
+   if [ ! -z $struct_space ]; then 
+   mkdir $outdir/struct_space
+   fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_spacecbf
+   fslmaths $tempdir/basil2/step1/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step1/logfile  $outdir/struct_space/logfile
+   fslmaths $tempdir/basil2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/noise 
+   else
+    fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
+   fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
+   fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise
+   fi
+fi
 
 
 
