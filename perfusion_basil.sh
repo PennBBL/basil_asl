@@ -48,7 +48,7 @@ Usage_extended() {
     
     echo " Registration "
     echo " --struct2al : transformation matrix from struct data to asl"
-    echo "                "
+    echo " --asl2struct : transformation matrix from asl to struct"
 
     echo " Calibration"
     echo "  --cgain     : Relative gain between calibration and ASL image - {default: 1}"
