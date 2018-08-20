@@ -457,15 +457,15 @@ datafile=$tempdir/diffdata
 #mkdir -p $tempdir/basil 
 echo  "Main run of BASIL on ASL data"
 
-if [ ! $spatial]; then
-         if [ ! $struct_space]; then 
+if [ -z ! $spatial]; then
+         if [ -z ! $struct_space]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
          else 
 	 basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
         fi
 else
-	 if [ ! $struct_space]; then 
+	 if [ -z ! $struct_space]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt 
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
          else 
@@ -485,8 +485,9 @@ if [ ! -z $pvgm ]; then
 	echo "Loading supplied PV images"
 	if [ -z $pvwm ]; then
         echo "ERROR: no WM PV image has been supplied"
-      fi
-        echo "PV GM is: $pvgm and register it to asldata"
+       fi
+        if [ -z $struct_space ]; then
+	echo "PV GM is: $pvgm and register it to asldata"
         antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvgm -ref $mask-out $tempdir/pvgm.nii.gz -init $struct2asl -applyxfm
 	fslmaths $tempdir/pvgm -thr 0.1 -min 1 $tempdir/pvgm_inasl
@@ -494,7 +495,13 @@ if [ ! -z $pvgm ]; then
         antsApplyTransforms -e 3 -d 3  -i $pvwm -o $tempdir/pvwm.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvwm -ref $mask -out $tempdir/pvwm.nii.gz -init $struct2asl  -applyxfm
 	fslmaths $tempdir/pvwm -thr 0.1 -min 1 $tempdir/pvwm_inasl
-        pvexist=1	
+        pvexist=1
+	else 
+	echo "PV GM is: $pvgm"
+	fslmaths $pvgm -thr 0.1 -min 1 $tempdir/pvgm_inasl
+	echo "PV WM is: $pvwm"
+	fslmaths $pvwm -thr 0.1 -min 1 $tempdir/pvwm_inasl
+        pvexist=1
 fi
 
 if [ ! -z $pvexist ]; then
@@ -509,8 +516,12 @@ fi
 
 ### Partial Volume Correction BASIL
 if [ ! -z $pvcorr ]; then
-   echo  "Main run of BASIL on ASL data with perfusion correction"
-   basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+  echo  "Main run of BASIL on ASL data with perfusion correction"
+   if [! -z spatial]; then 
+    basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl --spatial 
+    else 
+    basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+    fi
 fi
 ### End of: Partial Volume Correction
 
