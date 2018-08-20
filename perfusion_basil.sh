@@ -307,7 +307,7 @@ fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 ### Label-control subtraction (we repeat subtraction after doing distortion correction - when applicable)
  echo " Do asl data processing"
 
-if [ ! $struct_space ]; 
+if [ ! $struct_space ]; then 
     echo "register asldata to structrual space"
     antsApplyTransforms -e 3 -d 3  -i $infile -o $tempdir/infile2struct.nii.gz -r $struct -t $asl2struct -n Linear
     antsApplyTransforms -e 3 -d 3  -i $mask -o $tempdir/mask2struct.nii.gz -r $struct -t $asl2struct -n Linear
