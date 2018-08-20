@@ -135,7 +135,9 @@ takeargs=0;boolarg="";isbool="";
 	    takeargs=1;;
 	--struct2asl) struct2asl=$argument;
 	    takeargs=1;;
-	--asl2struct) asl2struct=$argument;
+	--asl2struct) asl2struct=$argument; struct_space=1;
+	    takeargs=1;;
+	--struct) struct=$argument;
 	    takeargs=1;;
 	--cgain) cgain=$argument
 	    takeargs=1;;
@@ -305,7 +307,17 @@ fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 ### Label-control subtraction (we repeat subtraction after doing distortion correction - when applicable)
  echo " Do asl data processing"
 
-asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata 
+if [ ! $struct_space ]; 
+    echo "register asldata to structrual space"
+    antsApplyTransforms -e 3 -d 3  -i $infile -o $tempdir/infile2struct.nii.gz -r $struct -t $asl2struct -n Linear
+    antsApplyTransforms -e 3 -d 3  -i $mask -o $tempdir/mask2struct.nii.gz -r $struct -t $asl2struct -n Linear
+    
+    asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata
+    asl_file1 --data=$tempdir/infile2struct.nii.gz --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata_struct
+    else
+    asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata
+fi
+    
 
 # Generate a perfusion-weighted image by taking the mean over all TIs of the differenced data
 fslmaths $tempdir/diffdata -Tmean $tempdir/pwi
@@ -444,7 +456,24 @@ datafile=$tempdir/diffdata
 
 #mkdir -p $tempdir/basil 
 echo  "Main run of BASIL on ASL data"
-basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt 
+
+if [ ! $spatial]; then
+         if [ ! $struct_space]; then 
+         basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
+         basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
+         else 
+	 basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
+        fi
+else
+	 if [ ! $struct_space]; then 
+         basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt 
+         basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
+         else 
+	 basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt
+        fi
+fi	 
+     
+     
 ### End of: First analysis on whole data
 
 
