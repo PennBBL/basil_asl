@@ -127,6 +127,8 @@ takeargs=0;boolarg="";isbool="";
 	    takeargs=1;;
 	--struct2asl) struct2asl=$argument;
 	    takeargs=1;;
+	--asl2struct) asl2struct=$argument;
+	    takeargs=1;;
 	--cgain) cgain=$argument
 	    takeargs=1;;
 	--alpha) alpha=$argument
@@ -144,6 +146,8 @@ takeargs=0;boolarg="";isbool="";
 	--fixbolus) fixbolus=1
 	    ;;
 	--casl) casl=1
+		;;
+	--spatial) spatial=1
 		;;
 	--exch) exch=$argument
 	    takeargs=1;;
