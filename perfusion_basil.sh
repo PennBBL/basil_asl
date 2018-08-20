@@ -598,11 +598,19 @@ fi
 # save the mask used to the (native space) output directory
 cp $mask $outdir/native_space/mask.nii.gz
 ### End of: Output main BASIL results
+
+
+
+
+
 fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
 fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
 cp $tempdir/basil_options.txt  $outdir/basil_option.txt
 cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
 fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise 
+
+
+
 
 if [ ! -z $calibflag ]; then
    fslcpgeom $outdir/native_space/cbf $Mo -d
