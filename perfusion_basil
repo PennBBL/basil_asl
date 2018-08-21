@@ -133,7 +133,7 @@ takeargs=0;boolarg="";isbool="";
 	    takeargs=1;;
 	--tr) tr=$argument
 	    takeargs=1;;
-	--struct2asl) struct2asl=$argument;
+	--struct2asl) struct2asl=$argument; regi=1;
 	    takeargs=1;;
 	--asl2struct) asl2struct=$argument; struct_space=1;
 	    takeargs=1;;
@@ -486,7 +486,7 @@ if [ ! -z $pvgm ]; then
 	if [ -z $pvwm ]; then
         echo "ERROR: no WM PV image has been supplied"
         fi
-        if [! -z $struct_space ]; then
+        if [! -z $regi ]; then
 	echo "PV GM is: $pvgm and register it to asldata"
         antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvgm -ref $mask-out $tempdir/pvgm.nii.gz -init $struct2asl -applyxfm
