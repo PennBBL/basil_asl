@@ -766,10 +766,10 @@ if [ ! -z $pvexist ]; then
 fi
 
 
-if [!  -z $calibflag ]; then 
+if [ !  -z $calibflag ]; then 
     if [ ! -z $pvexist ]; then 
-          if [ ! -z $spatial]; then 
-             if [! -z $struct_space]; then 
+          if [ ! -z $spatial ]; then 
+             if [ ! -z $struct_space ]; then 
                   fslmaths $outdir/struct_space/pvcorr/cbf -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_calib
                   fslmaths $outdir/struct_space/pvcorr/noise -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/noise_calib
                   fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
@@ -786,7 +786,7 @@ if [!  -z $calibflag ]; then
                  fslmaths $outdir/native_space_spatial/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space_spatial/pvcorr/noise_calib
 	   fi	 
      else 
-            if [! -z $struct_space]; then 
+            if [ ! -z $struct_space ]; then 
                   fslmaths $outdir/struct_space/pvcorr/cbf -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_calib
                   fslmaths $outdir/struct_space/pvcorr/noise -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/noise_calib
                   fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
