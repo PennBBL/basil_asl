@@ -486,7 +486,7 @@ if [ ! -z $pvgm ]; then
 	if [ -z $pvwm ]; then
         echo "ERROR: no WM PV image has been supplied"
         fi
-        if [! -z $regi ]; then
+        if [ ! -z $regi ]; then
 	echo "PV GM is: $pvgm and register it to asldata"
         antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvgm -ref $mask-out $tempdir/pvgm.nii.gz -init $struct2asl -applyxfm
