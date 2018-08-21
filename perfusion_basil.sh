@@ -15,7 +15,7 @@ Usage() {
     echo "Calculate perfusion maps from ASL data"
     echo ""
     echo "Usage: perfusion_basil -i <asl_data> -o <output_dir_name> [options]"
-    echo ""
+    echo " "
     echo " Main options:"
     echo " -m         : mask (in native space of ASL data) - {default: automatically generated}"
     echo " --mc       : apply motion correction using mcflirt"
@@ -307,14 +307,14 @@ fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 ### Label-control subtraction (we repeat subtraction after doing distortion correction - when applicable)
  echo " Do asl data processing"
 
-if [ ! $struct_space ]; then 
+if [ ! -z  $struct_space ]; then 
     echo "register asldata to structrual space"
     antsApplyTransforms -e 3 -d 3  -i $infile -o $tempdir/infile2struct.nii.gz -r $struct -t $asl2struct -n Linear
     antsApplyTransforms -e 3 -d 3  -i $mask -o $tempdir/mask2struct.nii.gz -r $struct -t $asl2struct -n Linear
-    
+    fslmaths $tempdir/mask2struct.nii.gz -bin $tempdir/mask2struct.nii.gz
     asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata
     asl_file1 --data=$tempdir/infile2struct.nii.gz --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata_struct
-    else
+else
     asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata
 fi
     
@@ -457,20 +457,20 @@ datafile=$tempdir/diffdata
 #mkdir -p $tempdir/basil 
 echo  "Main run of BASIL on ASL data"
 
-if [ -z ! $spatial]; then
-         if [ -z ! $struct_space]; then 
+if [! -z  $spatial]; then
+         if [! -z $struct_space]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
          else 
 	 basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
-        fi
+         fi
 else
-	 if [ -z ! $struct_space]; then 
+	 if [! -z $struct_space]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt 
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
          else 
 	 basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt
-        fi
+         fi
 fi	 
      
      
@@ -485,8 +485,8 @@ if [ ! -z $pvgm ]; then
 	echo "Loading supplied PV images"
 	if [ -z $pvwm ]; then
         echo "ERROR: no WM PV image has been supplied"
-       fi
-        if [ -z $struct_space ]; then
+        fi
+        if [! -z $struct_space ]; then
 	echo "PV GM is: $pvgm and register it to asldata"
         antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvgm -ref $mask-out $tempdir/pvgm.nii.gz -init $struct2asl -applyxfm
@@ -518,14 +518,17 @@ fi
 if [ ! -z $pvcorr ]; then
   echo  "Main run of BASIL on ASL data with perfusion correction"
    if [! -z $spatial]; then 
-      if [ -z $struct_space]; then
+      if [ ! -z $struct_space]; then
       basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      fi 
       else
       basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
       fi
    else 
-      if [ -z $struct_space]; then
+      if [ ! -z $struct_space]; then
       basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+       basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
       else
       basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
       fi
@@ -646,6 +649,29 @@ if [ ! -z $spatial]; then
    cp $tempdir/basil/step2/logfile  $outdir/native_space_spatial/logfile
    fslmaths $tempdir/basil/step2/noise_means -mul $mask  $outdir/native_space_spatial/noise 
    fi
+   
+else 
+   if [ ! -z $struct_space ]; then 
+   mkdir $outdir/struct_space
+   fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/cbf
+   fslmaths $tempdir/basil2/step1/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step1/logfile  $outdir/struct_space/logfile
+   fslmaths $tempdir/basil2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/noise   
+   fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
+   fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
+   fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise 
+   mkdir $outdir/native_space_spatial 
+   
+   else 
+   fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
+   fslmaths $tempdir/basil/step1/mean_fblood -mul $mask  $outdir/native_space/acbv 
+   cp $tempdir/basil_options.txt  $outdir/basil_option.txt
+   cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
+   fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise
+   fi
 
 fi
 
@@ -702,15 +728,15 @@ if [ ! -z $pvexist ]; then
     if [ ! -z $spatial]; then 
         if [ ! -z  $struct_space]; then
 	mkdir $outdir/struct_space/pvcorr
-        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/struct_space/pvcorr/cbf
-        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/struct_space/pvcorr/noise 
+        fslmaths $tempdir/pvcorr2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz $outdir/struct_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/pvcorr/noise 
         mkdir $outdir/struct_space_spatial/pvcorr
-        fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/struct_space_spatial/pvcorr/cbf
-        fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/struct_space_spatial/pvcorr/noise 
-	mkdir $outdir/native_space/pvcorr
+        fslmaths $tempdir/pvcorr2/step2/mean_ftiss -mul $tempdir/mask2struct.nii.gz $outdir/struct_space_spatial/pvcorr/cbf
+        fslmaths $tempdir/pvcorr2/step2/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space_spatial/pvcorr/noise 
+	mkdir -p $outdir/native_space/pvcorr
         fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
         fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/native_space/pvcorr/noise 
-        mkdir $outdir/native_space_spatial/pvcorr
+        mkdir -p $outdir/native_space_spatial/pvcorr
         fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/native_space_spatial/pvcorr/cbf
         fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/native_space_spatial/pvcorr/noise  
 	else
@@ -723,15 +749,15 @@ if [ ! -z $pvexist ]; then
 	fi
   else
      if [ ! -z  $struct_space]; then
-	mkdir $outdir/struct_space/pvcorr
-        fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/struct_space/pvcorr/cbf
-        fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/struct_space/pvcorr/noise 
+	mkdir -p $outdir/struct_space/pvcorr
+        fslmaths $tempdir/pvcorr2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz $outdir/struct_space/pvcorr/cbf
+        fslmaths $tempdir/pvcorr2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/pvcorr/noise 
         
-	mkdir $outdir/native_space/pvcorr
+	mkdir -p $outdir/native_space/pvcorr
         fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
         fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/native_space/pvcorr/noise 
         else
-	mkdir $outdir/native_space/pvcorr
+	mkdir -p $outdir/native_space/pvcorr
         fslmaths $tempdir/pvcorr/step1/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
         fslmaths $tempdir/pvcorr/step1/noise_means -mul $mask  $outdir/native_space/pvcorr/noise	
 	fi 
@@ -770,6 +796,7 @@ if [!  -z $calibflag ]; then
                  fslmaths $outdir/native_space/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space/pvcorr/noise_calib
 	    fi
     fi
+ fi
 fi
 # clearup
 
