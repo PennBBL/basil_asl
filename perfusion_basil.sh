@@ -680,8 +680,8 @@ fi
 if [ ! -z $calibflag ]; then
    fslcpgeom $outdir/native_space/cbf $Mo -d
    fslcpgeom $outdir/native_space/cbf $Mo1 -d
-   if [ ! -z $spatial]; then 
-       if [! -z $struct_space]; then 
+   if [ ! -z $spatial ]; then 
+       if [ ! -z $struct_space ]; then 
        fslmaths $outdir/struct_space/cbf -mul 6000 -div $Mo1 $outdir/struct_space/cbf_calib
        fslmaths $outdir/struct_space/noise -mul 6000 -div $Mo1 $outdir/struct_space/noise_calib
        fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
@@ -698,7 +698,7 @@ if [ ! -z $calibflag ]; then
        fslmaths $outdir/native_space/noise -mul 6000 -div $Mo $outdir/native_space/noise_calib
        fi  
    else 
-      if [! -z $struct_space]; then 
+      if [ ! -z $struct_space ]; then 
       fslmaths $outdir/struct_space/cbf -mul 6000 -div $Mo1 $outdir/struct_space/cbf_calib
       fslmaths $outdir/struct_space/noise -mul 6000 -div $Mo1 $outdir/struct_space/noise_calib
       fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
@@ -726,8 +726,8 @@ if [ ! -z $pvexist ]; then
     cp $tempdir/wmmask.nii.gz $outdir/native_space/wm_mask.nii.gz
     cp $tempdir/gmmask_pure.nii.gz $outdir/native_space/gm_roi.nii.gz
     cp $tempdir/wmmask_pure.nii.gz $outdir/native_space/wm_roi.nii.gz
-    if [ ! -z $spatial]; then 
-        if [ ! -z  $struct_space]; then
+    if [ ! -z $spatial ]; then 
+        if [ ! -z  $struct_space ]; then
 	mkdir $outdir/struct_space/pvcorr
         fslmaths $tempdir/pvcorr2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz $outdir/struct_space/pvcorr/cbf
         fslmaths $tempdir/pvcorr2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/pvcorr/noise 
@@ -749,7 +749,7 @@ if [ ! -z $pvexist ]; then
         fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/native_space_spatial/pvcorr/noise
 	fi
   else
-     if [ ! -z  $struct_space]; then
+     if [ ! -z  $struct_space ]; then
 	mkdir -p $outdir/struct_space/pvcorr
         fslmaths $tempdir/pvcorr2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz $outdir/struct_space/pvcorr/cbf
         fslmaths $tempdir/pvcorr2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/pvcorr/noise 
