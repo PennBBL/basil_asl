@@ -290,7 +290,7 @@ fi
 # read in ASL data
 cp $infile $tempdir/asldata.nii.gz # this is the MAIN data that we will reflect any corrections applied
 # take a copy that will not be subject to any subsequent corrections
-cp $tempdir/asldata $tempdir/asldata_orig.nii.gz
+cp $tempdir/asldata.nii.gz $tempdir/asldata_orig.nii.gz
 
 ### Motion Correction (main)
 # note motion correction within calibration data is done above
