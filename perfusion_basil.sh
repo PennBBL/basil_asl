@@ -457,15 +457,15 @@ datafile=$tempdir/diffdata
 #mkdir -p $tempdir/basil 
 echo  "Main run of BASIL on ASL data"
 
-if [! -z $spatial]; then
-         if [! -z $struct_space]; then 
+if [ ! -z $spatial ]; then
+         if [! -z $struct_space ]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
          else 
 	 basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
          fi
 else
-	 if [! -z $struct_space]; then 
+	 if [ ! -z $struct_space ]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt 
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
          else 
@@ -517,7 +517,7 @@ fi
 ### Partial Volume Correction BASIL
 if [ ! -z $pvcorr ]; then
   echo  "Main run of BASIL on ASL data with perfusion correction"
-   if [! -z $spatial]; then 
+   if [ ! -z $spatial ]; then 
       if [ ! -z $struct_space]; then
       basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
       basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
@@ -526,7 +526,7 @@ if [ ! -z $pvcorr ]; then
       basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
       fi
    else 
-      if [ ! -z $struct_space]; then
+      if [ ! -z $struct_space ]; then
       basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
        basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
       else
@@ -707,6 +707,7 @@ if [ ! -z $calibflag ]; then
       fslmaths $outdir/native_space/cbf -mul 6000 -div $Mo $outdir/native_space/cbf_calib
       fslmaths $outdir/native_space/noise -mul 6000 -div $Mo $outdir/native_space/noise_calib
       fi 
+ fi
 fi
 
 
