@@ -457,7 +457,7 @@ datafile=$tempdir/diffdata
 #mkdir -p $tempdir/basil 
 echo  "Main run of BASIL on ASL data"
 
-if [! -z  $spatial]; then
+if [! -z $spatial]; then
          if [! -z $struct_space]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
@@ -768,7 +768,7 @@ fi
 if [!  -z $calibflag ]; then 
     if [ ! -z $pvexist ]; then 
           if [ ! -z $spatial]; then 
-              if [! -z $struct_space]; then 
+             if [! -z $struct_space]; then 
                   fslmaths $outdir/struct_space/pvcorr/cbf -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_calib
                   fslmaths $outdir/struct_space/pvcorr/noise -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/noise_calib
                   fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
