@@ -309,8 +309,8 @@ fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 
 if [ ! -z  $struct_space ]; then 
     echo "register asldata to structrual space"
-    antsApplyTransforms -e 3 -d 3  -i $infile -o $tempdir/infile2struct.nii.gz -r $struct -t $asl2struct -n Linear
-    antsApplyTransforms -e 3 -d 3  -i $mask -o $tempdir/mask2struct.nii.gz -r $struct -t $asl2struct -n Linear
+    antsApplyTransforms -e 3 -d 3  -i $infile -o $tempdir/infile2struct.nii.gz -r $struct  -n Linear
+    antsApplyTransforms -e 3 -d 3  -i $mask -o $tempdir/mask2struct.nii.gz -r $struct  -n Linear
     fslmaths $tempdir/mask2struct.nii.gz -bin $tempdir/mask2struct.nii.gz
     asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata
     asl_file1 --data=$tempdir/infile2struct.nii.gz --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata_struct
@@ -458,7 +458,7 @@ datafile=$tempdir/diffdata
 echo  "Main run of BASIL on ASL data"
 
 if [ ! -z $spatial ]; then
-         if [! -z $struct_space ]; then 
+         if [ ! -z $struct_space ]; then 
          basil1 -i $datafile -m $mask -o $tempdir/basil -@ $tempdir/basil_options.txt --spatial
          basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/basil2 -@ $tempdir/basil_options.txt --spatial
          else 
@@ -488,13 +488,17 @@ if [ ! -z $pvgm ]; then
         fi
         if [ ! -z $regi ]; then
 	echo "PV GM is: $pvgm and register it to asldata"
-        antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm.nii.gz -r $mask -t $struct2asl -n Linear
+        antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm1.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvgm -ref $mask-out $tempdir/pvgm.nii.gz -init $struct2asl -applyxfm
-	fslmaths $tempdir/pvgm -thr 0.1 -min 1 $tempdir/pvgm_inasl
+	fslmaths $tempdir/pvgm1 -thr 0.1 -min 1 $tempdir/pvgm_inasl1
 	echo "PV WM is: $pvwm and register it to asl data"
-        antsApplyTransforms -e 3 -d 3  -i $pvwm -o $tempdir/pvwm.nii.gz -r $mask -t $struct2asl -n Linear
+        antsApplyTransforms -e 3 -d 3  -i $pvwm -o $tempdir/pvwm1.nii.gz -r $mask -t $struct2asl -n Linear
         #flirt  -in $pvwm -ref $mask -out $tempdir/pvwm.nii.gz -init $struct2asl  -applyxfm
-	fslmaths $tempdir/pvwm -thr 0.1 -min 1 $tempdir/pvwm_inasl
+	fslmaths $tempdir/pvwm1 -thr 0.1 -min 1 $tempdir/pvwm_inasl1
+	echo "PV GM is: $pvgm"
+	fslmaths $pvgm -thr 0.1 -min 1 $tempdir/pvgm_inasl
+	echo "PV WM is: $pvwm"
+	fslmaths $pvwm -thr 0.1 -min 1 $tempdir/pvwm_inasl
         pvexist=1
 	else 
 	echo "PV GM is: $pvgm"
@@ -520,17 +524,17 @@ if [ ! -z $pvcorr ]; then
    if [ ! -z $spatial ]; then 
       if [ ! -z $struct_space]; then
       basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
-      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl1	 --pwm=$tempdir/pvwm_inasl1
       fi 
       else
-      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --spatial --pgm=$tempdir/pvgm_inasl1 --pwm=$tempdir/pvwm_inasl1
       fi
    else 
       if [ ! -z $struct_space ]; then
       basil1 -i $tempdir/diffdata_struct -m $tempdir/mask2struct.nii.gz -o $tempdir/pvcorr2 -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
-       basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+       basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl1 --pwm=$tempdir/pvwm_inasl1
       else
-      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl --pwm=$tempdir/pvwm_inasl
+      basil1 -i $datafile -m $mask -o $tempdir/pvcorr -@ $tempdir/basil_options.txt --pgm=$tempdir/pvgm_inasl1 --pwm=$tempdir/pvwm_inasl1
       fi
     fi
 fi
@@ -610,13 +614,13 @@ cp $mask $outdir/native_space/mask.nii.gz
 
 
 
-if [ ! -z $spatial]; then 
+if [ ! -z $spatial ]; then 
    if [ ! -z $struct_space ]; then 
    mkdir $outdir/struct_space
    fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/cbf
    fslmaths $tempdir/basil2/step1/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/acbv 
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
-   cp $tempdir/basil/step1/logfile  $outdir/struct_space/logfile
+   cp $tempdir/basil2/step1/logfile  $outdir/struct_space/logfile
    fslmaths $tempdir/basil2/step1/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/noise 
    mkdir $outdir/struct_space_spatial 
    fslmaths $tempdir/basil2/step2/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space_spatial/cbf
