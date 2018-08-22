@@ -633,13 +633,12 @@ if [ ! -z $calibflag ]; then
 	fi
          fslmaths $Mo -mul $alpha -div 0.9 $Mo
 	#inlcude partiition co-effcient in M0 image to convert from M0 tissue to M0 arterial
-	if [ ! -z $struct_space ]; then 
-	antsApplyTransforms -e 3 -d 3  -i $Mo -o $outdir/calib/Mo_structspace.nii.gz -r $struct  -n Linear
-	Mo1=$outdir/calib/Mo_structspace.nii.gz
-	fi
 fi
 
-
+if [ ! -z $struct_space ]; then 
+   antsApplyTransforms -e 3 -d 3  -i $Mo -o $outdir/calib/Mo_structspace.nii.gz -r $struct  -t $asl2struct  -n Linear
+   Mo1=$outdir/calib/Mo_structspace.nii.gz
+fi
 
 
 ### End of: Calibration
