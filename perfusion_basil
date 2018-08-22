@@ -624,7 +624,7 @@ if [ ! -z $calibflag ]; then
 	mkdir $outdir/calib
 	fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/calib/M0
         echo " copying M0 map"
-	Mo=$outdir/calib/M0 
+	Mo=$outdir/calib/M0.nii.gz 
 	if [ 1 -eq `echo "$tr < 5" | bc`  ]; then
 	 # correct the M0 image for short TR using the equation from the white paper
 	    echo "Correcting the calibration (M0) image for short TR (using T1 of tissue $t1tset)"
