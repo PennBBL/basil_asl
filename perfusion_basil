@@ -351,8 +351,8 @@ fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 
 if [ ! -z  $struct_space ]; then 
     echo "register asldata to structrual space"
-    antsApplyTransforms -e 3 -d 3  -i $infile -o $tempdir/infile2struct.nii.gz -r $struct  -n Linear
-    antsApplyTransforms -e 3 -d 3  -i $mask -o $tempdir/mask2struct.nii.gz -r $struct  -n Linear
+    antsApplyTransforms -e 3 -d 3  -i $infile -o $tempdir/infile2struct.nii.gz -r $struct -t $asl2struct  -n Linear
+    antsApplyTransforms -e 3 -d 3  -i $mask -o $tempdir/mask2struct.nii.gz -r $struct -t $asl2struct -n Linear
     fslmaths $tempdir/mask2struct.nii.gz -bin $tempdir/mask2struct.nii.gz
     asl_file1 --data=$infile --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata
     asl_file1 --data=$tempdir/infile2struct.nii.gz --ntis=$ntis --iaf=$iaf --diff --out=$tempdir/diffdata_struct
