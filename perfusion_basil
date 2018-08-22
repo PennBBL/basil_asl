@@ -695,7 +695,7 @@ if [ ! -z $spatial ]; then
    
 else 
    if [ ! -z $struct_space ]; then 
-   mkdir $outdir/struct_space
+  
    fslmaths $tempdir/basil2/step1/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/cbf
    fslmaths $tempdir/basil2/step1/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/acbv 
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
@@ -706,7 +706,7 @@ else
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
    cp $tempdir/basil/step1/logfile  $outdir/native_space/logfile
    fslmaths $tempdir/basil/step1/noise_means -mul $mask  $outdir/native_space/noise 
-   mkdir $outdir/native_space_spatial 
+ 
    
    else 
    fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
