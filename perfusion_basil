@@ -758,7 +758,7 @@ fi
 
 
 if [ ! -z $pvcorr ]; then
-mkdir $outdir/pvcorr
+
 # copy PVE in ASL space to output directory
 cp $tempdir/pvgm_inasl.nii.gz $outdir/pvgm_inasl.nii.gz
 cp $tempdir/pvwm_inasl.nii.gz $outdir/pvwm_inasl.nii.gz
