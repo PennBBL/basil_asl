@@ -649,7 +649,7 @@ if [ ! -z $spatial ]; then
    fslmaths $tempdir/basil/step2/mean_ftiss -mul $mask  $outdir/native_space/spatial/cbf
    fslmaths $tempdir/basil/step2/mean_fblood -mul $mask  $outdir/native_space/spatial/acbv 
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
-   cp $tempdir/basil/step2/logfile  $outdir/native_spatial/logfile
+   cp $tempdir/basil/step2/logfile  $outdir/native_space/spatial/logfile
    fslmaths $tempdir/basil/step2/noise_means -mul $mask  $outdir/native_space/spatial/noise 
    else 
    fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
@@ -661,7 +661,7 @@ if [ ! -z $spatial ]; then
    fslmaths $tempdir/basil/step2/mean_ftiss -mul $mask  $outdir/native_space/spatial/cbf
    fslmaths $tempdir/basil/step2/mean_fblood -mul $mask  $outdir/native_space/spatial/acbv 
    cp $tempdir/basil_options.txt  $outdir/basil_option.txt
-   cp $tempdir/basil/step2/logfile  $outdir/native_spatial/logfile
+   cp $tempdir/basil/step2/logfile  $outdir/native_space/spatial/logfile
    fslmaths $tempdir/basil/step2/noise_means -mul $mask  $outdir/native_space/spatial/noise 
    fi
    
