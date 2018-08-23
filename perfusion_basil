@@ -270,7 +270,7 @@ if [ ! -z $spatial ]; then
        mkdir $outdir/struct_space/spatial
     else
        mkdir $outdir/native_space
-       mkdir $outdir/native_space/satial
+       mkdir $outdir/native_space/spatial
     fi
 else
     if [ ! -z $struct_space ]; then 
