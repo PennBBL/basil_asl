@@ -637,7 +637,7 @@ if [ ! -z $spatial ]; then
   
    fslmaths $tempdir/basil2/step2/mean_ftiss -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/spatial/cbf
    fslmaths $tempdir/basil2/step2/mean_fblood -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/spatial/acbv 
-   cp $tempdir/basil/step2/logfile  $outdir/struct_spatial/logfile
+   cp $tempdir/basil/step2/logfile  $outdir/struct_space/spatial/logfile
    fslmaths $tempdir/basil2/step2/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/spatial/noise 
     
    fslmaths $tempdir/basil/step1/mean_ftiss -mul $mask  $outdir/native_space/cbf
@@ -744,11 +744,14 @@ if [ ! -z $pvexist ]; then
         if [ ! -z  $struct_space ]; then
         fslmaths $tempdir/pvcorr2/step2/mean_ftiss -mul $tempdir/mask2struct.nii.gz $outdir/struct_space/pvcorr/cbf_gm
 	fslmaths $tempdir/pvcorr2/step2/mean_fwm -mul $tempdir/mask2struct.nii.gz $outdir/struct_space/pvcorr/cbf_wm
-        fslmaths $tempdir/pvcorr2/step2/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/pvcorr/noise 
-        fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf
-        fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/native_space/pvcorr/noise
+        fslmaths $tempdir/pvcorr2/step2/noise_means -mul $tempdir/mask2struct.nii.gz  $outdir/struct_space/pvcorr/noise
 	fslmaths $outdir/struct_space/pvcorr/cbf_gm -add $outdir/struct_space/pvcorr/cbf_wm $outdir/struct_space/pvcorr/cbf
+	
+        fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf_gm
+	fslmaths $tempdir/pvcorr/step2/mean_fwm -mul $mask $outdir/native_space/pvcorr/cbf_wm
+        fslmaths $tempdir/pvcorr/step2/noise_means -mul $mask  $outdir/native_space/pvcorr/noise
 	fslmaths $outdir/native_space/pvcorr/cbf_gm -add $outdir/native_space/pvcorr/cbf_wm $outdir/native_space/pvcorr/cbf
+	
 	else
         fslmaths $tempdir/pvcorr/step2/mean_ftiss -mul $mask $outdir/native_space/pvcorr/cbf_gm
 	fslmaths $tempdir/pvcorr/step2/mean_fwm -mul $mask $outdir/native_space/pvcorr/cbf_wm
@@ -768,6 +771,8 @@ if [ !  -z $calibflag ]; then
                  fslmaths $outdir/struct_space/pvcorr/cbf_gm -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_gm_calib
 		 fslmaths $outdir/struct_space/pvcorr/cbf_wm -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_wm_calib
                  fslmaths $outdir/struct_space/pvcorr/noise -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/noise_calib
+		 fslmaths $outdir/struct_space/pvcorr/cbf -mul 6000 -div $Mo1 $outdir/struct_space/pvcorr/cbf_calib
+		 
                  fslmaths $outdir/native_space/pvcorr/cbf -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_calib
                  fslmaths $outdir/native_space/pvcorr/noise -mul 6000 -div $Mo $outdir/native_space/pvcorr/noise_calib
 		 fslmaths $outdir/native_space/pvcorr/cbf_gm -mul 6000 -div $Mo $outdir/native_space/pvcorr/cbf_gm_calib
