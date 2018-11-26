@@ -78,7 +78,7 @@ mkdir -p /opt/ants-2.2.0
 curl -fsSL --retry 5 https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz \
 | tar -xz -C /opt/ants-2.2.0 --strip-components 1
 
-sed -i '$iexport BASILDIR=/basil_asl-version2' $ND_ENTRYPOINT
+sed -i '$iexport BASILDIR=/basil_asl-master' $ND_ENTRYPOINT
 
 sed -i '$iexport FSLDIR=/opt/fsl-5.0.11' $ND_ENTRYPOINT
 
@@ -86,9 +86,9 @@ sed -i '$iexport ANTSPATH=/opt/ants-2.2.0' $ND_ENTRYPOINT
 
 sed -i '$iexport PATH=$PATH:$BASILDIR' $ND_ENTRYPOINT
 
-bash -c 'cd / && wget https://github.com/PennBBL/basil_asl/archive/version2.zip && unzip version2.zip && chmod +x /basil_asl-version2/*'
+bash -c 'cd / && wget https://github.com/PennBBL/basil_asl/archive/master.zip && unzip master.zip && chmod +x /basil_asl-master/*'
 
-bash -c 'BASILDIR=/basil_asl-version2 FSLDIR=/opt/fsl-5.0.11  ANTSPATH=/opt/ants-2.2.0 '
+bash -c 'BASILDIR=/basil_asl-master FSLDIR=/opt/fsl-5.0.11  ANTSPATH=/opt/ants-2.2.0 '
 
 bash -c ' echo =========================='
 
@@ -131,13 +131,13 @@ echo '{
 \n    [
 \n      "env",
 \n      {
-\n        "BASILDIR": "/basil_asl-version2",
+\n        "BASILDIR": "/basil_asl-master",
 \n        "FSLDIR": "/opt/fsl-5.0.11"
 \n      }
 \n    ],
 \n    [
 \n      "add_to_entrypoint",
-\n      "export BASILDIR=/basil_asl-version2"
+\n      "export BASILDIR=/basil_asl-master"
 \n    ],
 \n    [
 \n      "add_to_entrypoint",
@@ -153,11 +153,11 @@ echo '{
 \n    ],
 \n    [
 \n      "run_bash",
-\n      "cd / && wget https://github.com/PennBBL/basil_asl/archive/version2.zip && unzip version2.zip && chmod +x /basil_asl-version2/*"
+\n      "cd / && wget https://github.com/PennBBL/basil_asl/archive/master.zip && unzip master.zip && chmod +x /basil_asl-master/*"
 \n    ],
 \n    [
 \n      "run_bash",
-\n      "BASILDIR=/basil_asl-version2 FSLDIR=/opt/fsl-5.0.11  ANTSPATH=/opt/ants-2.2.0 "
+\n      "BASILDIR=/basil_asl-master FSLDIR=/opt/fsl-5.0.11  ANTSPATH=/opt/ants-2.2.0 "
 \n    ],
 \n    [
 \n      "run_bash",
@@ -173,7 +173,7 @@ echo '{
 \n    ],
 \n    [
 \n      "entrypoint",
-\n      "/neurodocker/startup.sh /basil_asl-version2/perfusion_basil \"$@\""
+\n      "/neurodocker/startup.sh /basil_asl-master/perfusion_basil \"$@\""
 \n    ]
 \n  ]
 \n}' > /neurodocker/neurodocker_specs.json
@@ -186,8 +186,8 @@ export FSLDIR="/opt/fsl-5.0.11"
 export PATH="/opt/fsl-5.0.11/bin:$PATH"
 export ANTSPATH="/opt/ants-2.2.0"
 export PATH="/opt/ants-2.2.0:$PATH"
-export BASILDIR="/basil_asl-version2"
+export BASILDIR="/basil_asl-master"
 export FSLDIR="/opt/fsl-5.0.11"
 
 %runscript
-/neurodocker/startup.sh /basil_asl-version2/perfusion_basil "$@"
+/neurodocker/startup.sh /basil_asl-master/perfusion_basil "$@"
