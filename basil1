@@ -247,7 +247,7 @@ echo "Model (in fabber) is : $model" >> $outdir/logfile
 # deal with white matter correction options
 if [ ! -z $pvcorr ]; then
     # we are doing PV corretion - force certain options
-    #spatial=1
+    spatial=1
     spnbiter=200 #need more iterations for the PV correction
 
     if [ -z $pgm ]; then
