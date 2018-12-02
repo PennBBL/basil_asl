@@ -284,7 +284,7 @@ echo "Saving results in natve (ASL aquisition) space to $outdir"
 
 ### End of Command line parameter interactions
 
-imcp $mask $tempdir/mask.nii.gz
+
 
 # standard pre-processing of calibration image
 
@@ -304,21 +304,23 @@ if [ -z $cgain ]; then
 fi
 
 
-fslmaths $M0  $tempdir/calib
 
-fslmaths $tempdir/calib -mas $tempdir/mask $tempdir/calib
 
 ## obtain sensoitivity form the mask data
 
-if [ ! -z $struct && ! -z pvcorr ]; then
+if [ ! -z $struct ]; then
    echo " Generating biasfield for sensitivity" 
-   bet $struct $tempdir/struct_brain 
+   bet $struct $tempdir/struct_brain -m 
    fast -B -b -o $tempdir/seg -p $tempdir/struct_brain 
-   antsApplyTransforms -e 3 -d 3 -i $tempdir/seg_bias.nii.gz -o $tempdir/segsen.nii.gz  -r  $tempdir/mask.nii.gz -t $struct2asl -n NearestNeighbor
-   fslmaths $tempdir/segsen -recip -mas  $tempdir/mask.nii.gz $tempdir/sens 
+   if [ ! -z $struct2asl ]; then
+     antsApplyTransforms -e 3 -d 3 -i $tempdir/seg_bias.nii.gz -o $tempdir/segsen.nii.gz  -r  $tempdir/mask.nii.gz -t $struct2asl -n NearestNeighbor
+   else
+    flirt -in $tempdir/seg_bias  -ref $tempdir/meanasl -out $tempdir/segsen -omat $tempdir/segsen.mat -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90
+   fi
+   
 fi
 
-
+  
 # read in ASL data
 fslmaths $infile -mul 1 $tempdir/asldata.nii.gz # this is the MAIN data that we will reflect any corrections applied
 # take a copy that will not be subject to any subsequent corrections
@@ -334,6 +336,22 @@ fi
 # Take mean of the asl data as we might need this in the next step, and subsequent steps
 fslmaths $tempdir/asldata -Tmean $tempdir/meanasl
 
+# generate mask if not presented 
+if [ ! -z $mask ]; then
+     imcp $mask $tempdir/mask
+     else
+     bet $tempdir/meanasl $tempdir/meanbrain -m
+     flirt -in $tempdir/struct_brain_mask -ref $tempdir/meanasl -out $tempdir/submask -omat $tempdir/submask.mat -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90     
+     fslmaths $tempdir/meanbrain_mask mul $tempdir/submask $tempdir/mask
+fi
+     
+if [ ! -z $pvcorr ]
+     fslmaths $tempdir/segsen -recip -mas  $tempdir/mask $tempdir/sens 
+fi
+     
+     
+     
+    
     
 
 #aslfile1=$XCPEDIR/utils/aslfile1
@@ -584,6 +602,8 @@ echo " alpha is : $alpha"
 
 if [ ! -z $calibflag ]; then
         if [ ! -z $M0 ]; then 
+	    fslmaths $M0  $tempdir/calib
+	    fslmaths $tempdir/calib -mas $tempdir/mask $tempdir/calib
 	    fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/M0
             echo " copying M0 map"
 	    Mo=$outdir/M0.nii.gz 
@@ -591,11 +611,13 @@ if [ ! -z $calibflag ]; then
 	   $cgain=1
 	   if [ $iaf==tc ]; then 
 	     3dcalc -prefix $tempdir/calib.nii.gz -a $infile'[1..$(2)]' -expr "a" 2>/dev/null
+	     fslmaths $tempdir/calib -mas $tempdir/mask $tempdir/calib
 	     fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/M0
 	     Mo=$outdir/M0.nii.gz
 	     tr=`fslinfo $Mo | grep "^dim4" | sed 's:dim4[ ]*::'`
 	     else if   [ $iaf==ct ]; then
 	     3dcalc -prefix $tempdir/calib.nii.gz -a $infile'[2..$(2)]' -expr "a" 2>/dev/null
+	     fslmaths $tempdir/calib -mas $tempdir/mask $tempdir/calib
 	     fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/M0
 	     Mo=$outdir/M0.nii.gz
 	     tr=`fslinfo $Mo | grep "^dim4" | sed 's:dim4[ ]*::'`
