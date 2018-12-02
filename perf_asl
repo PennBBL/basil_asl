@@ -127,6 +127,8 @@ takeargs=0;boolarg="";isbool="";
 		takeargs=1;;
 	--M0) M0=$argument; calibflag=1;
 	    takeargs=1;;
+	--calib) calibflag=1;
+	    takeargs=1;;	   
 	--t1t) t1tset=$argument; #the T1 of tissue to be used in calibration
 	    takeargs=1;;
 	--tr) tr=$argument;
@@ -513,15 +515,16 @@ if [ ! -z $pvgm ]; then
         fi
 	echo "PV GM is: $pvgm and register it to template"
         antsApplyTransforms -e 3 -d 3  -i  $pvgm -o $tempdir/pvgm1.nii.gz -r $tempdir/meanasl.nii.gz -t $struct2asl -n NearestNeighbor
-	#antsApplyTransforms -e 3 -d 3  -i $pvgm -o $tempdir/pvgm1.nii.gz -r  ${template} -t ${subj2templatew} -t ${subj2templatea}  -n NearestNeighbor         
-	#flirt  -in $pvgm -ref $mask-out $tempdir/pvgm.nii.gz -init $struct2asl -applyxfm
 	fslmaths $tempdir/pvgm1 -thr 0.1 -min 1 $tempdir/pvgm_inasl
 	echo "PV WM is: $pvwm and register it to asl data"
         antsApplyTransforms -e 3 -d 3  -i  $pvwm -o $tempdir/pvwm1.nii.gz -r $tempdir/meanasl.nii.gz -t $struct2asl -n NearestNeighbor
-	#antsApplyTransforms -e 3 -d 3  -i $pvwm -o $tempdir/pvwm1.nii.gz -r  ${template} -t ${subj2templatew} -t ${subj2templatea}  -n NearestNeighbor                
-	#flirt  -in $pvwm -ref $mask -out $tempdir/pvwm.nii.gz -init $struct2asl  -applyxfm
 	fslmaths $tempdir/pvwm1 -thr 0.1 -min 1 $tempdir/pvwm_inasl
 	pvexist=1
+else if [ ! -z $struct]
+       flirt -in $tempdir/seg_pve_1 -ref $tempdir/meanasl -out $tempdir/pvgm1 -omat $tempdir/pvgm1.mat -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -dof 12  -interp trilinear
+       fslmaths $tempdir/pvgm1 -thr 0.1 -min 1 $tempdir/pvgm_inasl
+       flirt -in $tempdir/seg_pve_2 -ref $tempdir/meanasl -out $tempdir/pvwm1 -omat $tempdir/pvwm1.mat -bins 256 -cost corratio -searchrx -90 90 -searchry -90 90 -searchrz -90 90 -dof 12  -interp trilinear
+       fslmaths $tempdir/pvwm1 -thr 0.1 -min 1 $tempdir/pvwm_inasl
 fi
 
 
@@ -580,12 +583,25 @@ echo " alpha is : $alpha"
 
 
 if [ ! -z $calibflag ]; then
-
-	echo "Calibration is voxelwise"
-
-	fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/M0
-        echo " copying M0 map"
-	Mo=$outdir/M0.nii.gz 
+        if [ ! -z $M0 ]; then 
+	    fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/M0
+            echo " copying M0 map"
+	    Mo=$outdir/M0.nii.gz 
+	else 
+	   $cgain=1
+	   if [ $iaf==tc ]; then 
+	     3dcalc -prefix $tempdir/calib.nii.gz -a $infile'[1..$(2)]' -expr "a" 2>/dev/null
+	     fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/M0
+	     Mo=$outdir/M0.nii.gz
+	     tr=`fslinfo $Mo | grep "^dim4" | sed 's:dim4[ ]*::'`
+	     else if   [ $iaf==ct ]; then
+	     3dcalc -prefix $tempdir/calib.nii.gz -a $infile'[2..$(2)]' -expr "a" 2>/dev/null
+	     fslmaths $tempdir/calib -Tmean -mul $cgain $outdir/M0
+	     Mo=$outdir/M0.nii.gz
+	     tr=`fslinfo $Mo | grep "^dim4" | sed 's:dim4[ ]*::'`
+	     fi
+	fi
+	     
 	if [ 1 -eq `echo "$tr < 5" | bc`  ]; then
 	 # correct the M0 image for short TR using the equation from the white paper
 	    echo "Correcting the calibration (M0) image for short TR (using T1 of tissue $t1tset)"
