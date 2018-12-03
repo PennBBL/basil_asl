@@ -15,4 +15,4 @@ neurodocker \
   --run-bash ' echo ==========================' \
   --run-bash 'cat $ND_ENTRYPOINT' \
   --run-bash ' echo ==========================' \
-  --entrypoint '/neurodocker/startup.sh /basil_asl-master/perfusion_basil "$@"' > Singularity
+  --entrypoint '/neurodocker/startup.sh /basil_asl-master/perf_asl "$@"' > Singularity
